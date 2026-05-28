@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace _245697_Quiz1
+namespace Computer_Graphics_Project
 {
     public class DDA
     {
