@@ -1,35 +1,77 @@
-﻿using System.Drawing;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Drawing;
+using System.Data.SqlTypes;
 
 namespace Computer_Graphics_Project
 {
+
     public class Circle
     {
-        public int rad;
-        public int xc, yc;     //This is the Center Of the Circle 
-        public float st, end;  //Draw From this Start Angle To this End Angle
-        public float theRadian;
-        public int i;
-        public void DrawCircle(Graphics g)
+        public int Rad;
+        public int Rad2;
+        public int XC;
+        public int YC;
+        public float thRadian;
+        public float st, end;
+        Pen pen;
+        public bool big;
+
+        public Circle(bool big)
         {
-            for (float i = st; i <= end; i += 1.0f) // walk on the angle from the start to the end and each time increase by one 
+            this.big = big;
+            if (big)
             {
-                theRadian = (float)((i * Math.PI) / 180); //Convert the angle to Radian bec sin and cos work with rad not degree
-                float x = (float)(rad * Math.Cos(theRadian));
-                float y = (float)(rad * Math.Sin(theRadian));
-                x += xc;//Because the equations work on point(0,0) after we get the point we want to put the circle in its place
-                y += yc;// So we add on x += xc and y += yc
-                g.FillEllipse(Brushes.Blue, x, y, 6, 6);//Draw that Pixel when all pixels drawn get the circle
+                pen = new Pen(Color.Black, 20);
             }
-            PointF tempst = GetNextPoint((int)st);
-            PointF tempend = GetNextPoint((int)end);
+            else
+            {
+                pen = new Pen(Color.Black, 7);
+
+            }
         }
-        public PointF GetNextPoint(int theta)
+
+
+        public void Drawcircle(Graphics g)
         {
+            for (float i = st; i <= end; i += 1.0f)
+            {
+                thRadian = (float)((i * Math.PI) / 180);
+                float x = (float)(Rad * Math.Cos(thRadian));
+                float y = (float)(Rad * Math.Sin(thRadian));
+
+                x += XC;
+                y += YC;
+
+                if(big == true)
+                {
+                    g.FillEllipse(Brushes.Black, x-20, y-20, 40, 40);
+                }
+                else
+                {
+                    g.FillEllipse(Brushes.Black, x-7, y-7, 15, 15);
+                }
+
+                if (i % 10 == 0 && big == true)
+                {
+                    PointF tempst = Getnextpoint((int)i, Rad2);
+                    g.DrawLine(pen, x, y, tempst.X, tempst.Y);
+                }
+                
+            }
+            
+        }
+        public PointF Getnextpoint(int theta, int Rad)
+        {
+
             PointF p = new PointF();
-            theRadian = (float)(theta * Math.PI / 180);
-            p.X = (float)(rad * Math.Cos(theRadian)) + xc;
-            p.Y = (float)(rad * Math.Sin(theRadian)) + yc;
+
+            thRadian = (float)(theta * Math.PI / 180);
+
+            p.X = (float)(Rad * Math.Cos(thRadian)) + XC;
+            p.Y = (float)(Rad * Math.Sin(thRadian)) + YC;
             return p;
         }
     }
