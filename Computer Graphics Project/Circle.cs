@@ -36,7 +36,7 @@ namespace Computer_Graphics_Project
 
         public void Drawcircle(Graphics g)
         {
-            for (float i = st; i <= end; i += 1.0f)
+            for (float i = st; i <= end; i += 0.5f)
             {
                 thRadian = (float)((i * Math.PI) / 180);
                 float x = (float)(Rad * Math.Cos(thRadian));

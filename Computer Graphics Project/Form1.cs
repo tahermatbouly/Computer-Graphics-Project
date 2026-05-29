@@ -15,6 +15,15 @@ namespace Computer_Graphics_Project
         void Draw(Graphics g);
         bool inside(int mouseX, int mouseY);
         void updatePos(int dx, int dy);
+
+        Rectangle getBound();
+
+        void increase();
+        void decrease();
+
+        //int x {  get; }
+        //int y { get; }
+
     }
 
     public class Loop: Road
@@ -23,12 +32,14 @@ namespace Computer_Graphics_Project
         Circle smallCircle = new Circle(false);
         int centerX;
         int centerY;
+        //public int x, y;
         string type = "loop";
 
        public Loop(int centerX, int centerY)
         {
             this.centerX = centerX;
             this.centerY = centerY;
+            
 
             bigCircle.XC = centerX;
             bigCircle.YC = centerY;
@@ -43,7 +54,8 @@ namespace Computer_Graphics_Project
             smallCircle.end = 360;
             smallCircle.Rad = bigCircle.Rad - (bigCircle.Rad / 9);
 
-            
+            //this.x = centerX - bigCircle.Rad;
+            //this.y = centerY - smallCircle.Rad;
         }
 
         public void Draw(Graphics g)
@@ -83,30 +95,119 @@ namespace Computer_Graphics_Project
             smallCircle.YC += dy;
 
         }
+
+        public Rectangle getBound()
+        {
+            Rectangle r = new Rectangle(centerX - bigCircle.Rad, centerY - bigCircle.Rad, bigCircle.Rad*2, bigCircle.Rad*2);
+            return r;
+            
+        }
+
+        public void increase()
+        {
+            if (smallCircle.Rad < 600)
+            {
+                bigCircle.Rad += 50;
+                bigCircle.Rad2 += 50;
+                smallCircle.Rad += 50;
+            }
+
+        }
+
+        public void decrease()
+        {
+            if (smallCircle.Rad > 50)
+            {
+                bigCircle.Rad -= 50;
+                bigCircle.Rad2 -= 50;
+                smallCircle.Rad -= 50;
+            }
+
+        }
     }
     public class LineSegment : Road
     {
         public PointF ptS, ptE;
-        Pen pen = new Pen(Color.Red, 5);
+
+        public PointF bigPtS, bigPtE;
+        public PointF smallPtS, smallPtE;
+
+        Pen smallPen = new Pen(Color.Black, 5);
+        Pen bigPen = new Pen(Color.Black, 15);
+
         public Transformation trans = new Transformation();
         public int move = 0;
         string type = "line";
 
         public void Draw(Graphics g)
         {
-            g.DrawLine(pen, ptS.X, ptS.Y, ptE.X, ptE.Y);
-            g.FillEllipse(Brushes.Gray, ptS.X - 10, ptS.Y - 10, 20, 20);
-            g.FillEllipse(Brushes.Gray, ptE.X - 10, ptE.Y - 10, 20, 20);
+            g.DrawLine(bigPen, bigPtS.X, bigPtS.Y, bigPtE.X, bigPtE.Y);
+            g.DrawLine(smallPen, smallPtS.X, smallPtS.Y, smallPtE.X, smallPtE.Y);
+            for(int i = (int)bigPtS.X; i < (int)bigPtE.X; i++)
+            {
+                if(i % 25 == 0)
+                {
+                    g.DrawLine(smallPen, i, bigPtS.Y, i, smallPtS.Y);
+                }
+            }
         }
 
         public bool inside(int mouseX, int mouseY)
         {
-            return false;
+            if ((mouseX >= bigPtS.X && mouseX <= bigPtE.X) && (mouseY <= bigPtS.Y && mouseY >= smallPtS.Y))
+            {
+                //MessageBox.Show("found line");
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public void updatePos(int dx, int dy)
         {
+            bigPtS.X += dx;
+            bigPtS.Y += dy;
+            bigPtE.X += dx;
+            bigPtE.Y += dy;
 
+            smallPtS.X += dx;
+            smallPtS.Y += dy;
+            smallPtE.X += dx;
+            smallPtE.Y += dy;
+
+        }
+
+        public Rectangle getBound()
+        {
+            
+            return new Rectangle((int)smallPtS.X - (this.getLength() / 20), (int)smallPtS.Y - (this.getLength() / 20), (int)(bigPtE.X - bigPtS.X) + (this.getLength() / 10), (int)(bigPtS.Y - smallPtS.Y) + (this.getLength() / 10));
+        }
+
+        public void increase()
+        {
+            if (bigPtE.X - bigPtS.X < 1500)
+            {
+                bigPtE.X += 50;
+
+                smallPtE.X += 50;
+            }
+        }
+
+        public void decrease()
+        {
+            if (bigPtE.X - bigPtS.X > 50)
+            {
+                bigPtE.X -= 50;
+                smallPtE.X -= 50;
+            }
+            
+        }
+
+        private int getLength()
+        {
+            return (int)bigPtE.X - (int)bigPtS.X;
         }
     }
 
@@ -119,8 +220,11 @@ namespace Computer_Graphics_Project
         Point lastMousePos;
         Graphics g, g2;
 
-        int lk = -1;
+        int moveLock = -1;
+        int selectLock = -1;
+
         int centerX, centerY, w, h;
+        bool isDrag = false;
 
         public Form1()
         {
@@ -137,12 +241,12 @@ namespace Computer_Graphics_Project
 
         private void Form1_MouseMove(object sender, MouseEventArgs e)
         {
-            if (lk != -1)
+            if (moveLock >= 0)
             {
                 int dx = e.X - lastMousePos.X;
                 int dy = e.Y - lastMousePos.Y;
 
-                road[lk].updatePos(dx, dy);
+                road[moveLock].updatePos(dx, dy);
 
                 lastMousePos.X = e.X;
                 lastMousePos.Y = e.Y;
@@ -153,7 +257,7 @@ namespace Computer_Graphics_Project
 
         private void Form1_MouseUp(object sender, MouseEventArgs e)
         {
-            lk = -1;
+            moveLock = -1;
         }
 
         private void T_Tick(object sender, EventArgs e)
@@ -172,16 +276,18 @@ namespace Computer_Graphics_Project
 
                 if (road[i].inside(e.X, e.Y) == true)
                 {
-                    lk = i;
+                    moveLock = i;
+                    selectLock = i;
                     lastMousePos.X = e.X;
                     lastMousePos.Y = e.Y;
-                    MessageBox.Show("found");
+                    //MessageBox.Show("found");
                     break;
                 }
                 else
                 {
-                    lk = -1;
-                    MessageBox.Show("not found");
+                    moveLock = -1;
+                    selectLock = -1;
+                    //MessageBox.Show("not found");
 
                 }
             }
@@ -195,6 +301,37 @@ namespace Computer_Graphics_Project
                 road.Add(loop);
                 this.Text = centerX + ", " + centerY;
             }
+            if (e.KeyCode == Keys.S)
+            {
+                LineSegment line = new LineSegment();
+                line.bigPtS = new PointF(centerX, centerY);
+                line.bigPtE = new PointF(centerX + 400, centerY);
+                line.smallPtS = new PointF((float)centerX, (float)centerY - 20);
+                line.smallPtE = new PointF((float)centerX + 400, (float)centerY - 20);
+                road.Add(line);
+                this.Text = centerX + ", " + centerY;
+            }
+
+
+
+
+
+            if (e.KeyCode == Keys.Up)
+            {
+                if(selectLock >= 0)
+                {
+                    road[selectLock].increase();
+                }
+            }
+            if (e.KeyCode == Keys.Down)
+            {
+                if (selectLock >= 0)
+                {
+                    road[selectLock].decrease();
+                }
+            }
+
+            drawdubb(this.CreateGraphics());
         }
 
         private void Form1_Paint(object sender, PaintEventArgs e)
@@ -230,11 +367,17 @@ namespace Computer_Graphics_Project
              );
 
 
-            g2.FillEllipse(Brushes.Red, centerX, centerY, 200, 200);
+            //g2.FillEllipse(Brushes.Red, centerX, centerY, 200, 200);
+
 
             for (int i = 0; i < road.Count; i++)
             {
                 road[i].Draw(g2);
+            }
+
+            if(selectLock >= 0)
+            {
+                g2.DrawRectangle(Pens.Red, road[selectLock].getBound());
             }
 
         }
