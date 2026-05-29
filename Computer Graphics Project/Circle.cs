@@ -22,15 +22,15 @@ namespace Computer_Graphics_Project
         public Circle(bool big)
         {
             this.big = big;
-            if (big)
+            if (big == true)
             {
-                pen = new Pen(Color.Black, 20);
+                pen = new Pen(Color.Black, 5);
             }
-            else
-            {
-                pen = new Pen(Color.Black, 7);
+            //else
+            //{
+            //    pen = new Pen(Color.Black, 7);
 
-            }
+            //}
         }
 
 
@@ -47,11 +47,11 @@ namespace Computer_Graphics_Project
 
                 if(big == true)
                 {
-                    g.FillEllipse(Brushes.Black, x-20, y-20, 40, 40);
+                    g.FillEllipse(Brushes.Black, x-7, y-7, 15, 15);
                 }
                 else
                 {
-                    g.FillEllipse(Brushes.Black, x-7, y-7, 15, 15);
+                    g.FillEllipse(Brushes.Black, x-3, y-3, 5, 5);
                 }
 
                 if (i % 10 == 0 && big == true)

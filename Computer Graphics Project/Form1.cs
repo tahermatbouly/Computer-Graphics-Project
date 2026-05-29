@@ -34,14 +34,14 @@ namespace Computer_Graphics_Project
             bigCircle.YC = centerY;
             bigCircle.st = 0;
             bigCircle.end = 360;
-            bigCircle.Rad = 600;
-            bigCircle.Rad2 = 500;
+            bigCircle.Rad =200;
+            bigCircle.Rad2 = bigCircle.Rad - (bigCircle.Rad / 9);
 
             smallCircle.XC = centerX;
             smallCircle.YC = centerY;
             smallCircle.st = 0;
             smallCircle.end = 360;
-            smallCircle.Rad = 500;
+            smallCircle.Rad = bigCircle.Rad - (bigCircle.Rad / 9);
 
             
         }
@@ -57,7 +57,7 @@ namespace Computer_Graphics_Project
 
             float inside = ((mouseX - centerX) * (mouseX - centerX)) + ((mouseY - centerY) * (mouseY - centerY)) - (bigCircle.Rad * bigCircle.Rad);
 
-            if (inside > 0)
+            if (inside < 0)
             {
                 //MessageBox.Show("True");
                 return true;
@@ -113,12 +113,14 @@ namespace Computer_Graphics_Project
     public partial class Form1 : Form
     {
         Timer T = new Timer();
-        Bitmap image;
+        Bitmap image = new Bitmap("wallpaper.jpg");
+        Bitmap buffer;
         List<Road> road = new List<Road>();
         Point lastMousePos;
+        Graphics g, g2;
 
         int lk = -1;
-        int centerX, centerY;
+        int centerX, centerY, w, h;
 
         public Form1()
         {
@@ -135,13 +137,13 @@ namespace Computer_Graphics_Project
 
         private void Form1_MouseMove(object sender, MouseEventArgs e)
         {
-            if(lk != -1)
+            if (lk != -1)
             {
                 int dx = e.X - lastMousePos.X;
                 int dy = e.Y - lastMousePos.Y;
 
                 road[lk].updatePos(dx, dy);
-                
+
                 lastMousePos.X = e.X;
                 lastMousePos.Y = e.Y;
             }
@@ -158,28 +160,28 @@ namespace Computer_Graphics_Project
         {
 
 
-            //drawdubb(this.CreateGraphics());
+            drawdubb(this.CreateGraphics());
         }
 
         private void Form1_MouseDown(object sender, MouseEventArgs e)
         {
-            //MessageBox.Show(centerX + ", " + centerY);
+            //MessageBox.Show(e.X + ", " + e.Y);
 
             for (int i = 0; i < road.Count; i++)
+            {
+
+                if (road[i].inside(e.X, e.Y) == true)
                 {
-                    
-                    if(road[i].inside(e.X, e.Y) == true)
-                    {
-                        lk = i;
-                        lastMousePos.X = e.X;
-                        lastMousePos.Y = e.Y;
-                        break;
-                        //MessageBox.Show("found");
-                    }
-                    else
-                    {
-                        lk = -1;
-                        //MessageBox.Show("not found");
+                    lk = i;
+                    lastMousePos.X = e.X;
+                    lastMousePos.Y = e.Y;
+                    MessageBox.Show("found");
+                    break;
+                }
+                else
+                {
+                    lk = -1;
+                    MessageBox.Show("not found");
 
                 }
             }
@@ -187,7 +189,7 @@ namespace Computer_Graphics_Project
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-            if(e.KeyCode == Keys.L)
+            if (e.KeyCode == Keys.L)
             {
                 Loop loop = new Loop(centerX, centerY);
                 road.Add(loop);
@@ -202,30 +204,58 @@ namespace Computer_Graphics_Project
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            image = new Bitmap("wallpaper.jpg");
-            centerX = this.ClientSize.Width / 2;
-            centerY = this.ClientSize.Height / 2;
+            //image = new Bitmap("wallpaper.jpg");
+            //centerX = this.ClientSize.Width / 2;
+            //centerY = this.ClientSize.Height / 2;
 
+            w = this.Width;
+            h = this.Height;
+            centerX = w / 2;
+            centerY = h / 2;
+            
 
 
         }
 
         private void drawscene(Graphics g2)
         {
-            
+            g2.Clear(Color.White);
+            //croprect = new Rectangle(0, start, 1920, 1080);
+            Pen pen = new Pen(Color.White);
 
+            g2.DrawImage(image,            // source
+               new Rectangle(0, 0, w, h), // where to draw in new bitmap
+               new Rectangle(0, 0, image.Width, image.Height),// what part to copy from source
+               GraphicsUnit.Pixel       // unit type (pixels)
+             );
+
+
+            g2.FillEllipse(Brushes.Red, centerX, centerY, 200, 200);
 
             for (int i = 0; i < road.Count; i++)
             {
                 road[i].Draw(g2);
             }
+
         }
 
         private void drawdubb(Graphics g)
         {
-            Graphics g2 = Graphics.FromImage(image);
+            if (buffer != null)
+            {
+                buffer.Dispose();
+            }
+
+            if (g2 != null)
+            {
+                g2.Dispose();
+            }
+
+
+            buffer = new Bitmap(w, h);
+            g2 = Graphics.FromImage(buffer);
             drawscene(g2);
-            g.DrawImage(image, 0, 0, this.ClientSize.Width, this.ClientSize.Height);
+            g.DrawImage(buffer, 0, 0, w, h);
         }
     }
 }
