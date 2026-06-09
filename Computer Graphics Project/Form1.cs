@@ -36,6 +36,7 @@ namespace Computer_Graphics_Project
         Circle smallCircle = new Circle(false);
         int centerX;
         int centerY;
+        int ct = 270;
         //public int x, y;
         string type = "loop";
 
@@ -137,7 +138,29 @@ namespace Computer_Graphics_Project
 
         public PointF CalcNextPoint()
         {
-            return new PointF(0, 0);
+
+            PointF p = new PointF();
+
+            float thRadian = (float)(ct * Math.PI / 180);
+            if (ct + 1 > 360)
+            {
+                ct = 0;
+            }
+            else
+            {
+                ct+=10;
+            }
+
+            p.X = (float)(bigCircle.Rad * Math.Cos(thRadian)) + bigCircle.XC;
+            p.Y = bigCircle.YC - (float)(bigCircle.Rad * Math.Sin(thRadian));
+            if(ct == 260)
+            {
+                if (Form1.moveLock + 1 < Form1.road.Count)
+                {
+                    Form1.moveLock++;
+                }
+            }
+            return p;
         }
     }
     public class LineSegment : Road
@@ -486,7 +509,7 @@ namespace Computer_Graphics_Project
 
             if (moveFlag == true)
             {
-                g2.FillEllipse(Brushes.Red, ball.X, ball.Y, 30, 30);
+                g2.FillEllipse(Brushes.Red, ball.X - 20, ball.Y - 20, 30, 30);
             }
 
         }
