@@ -26,15 +26,16 @@ namespace Computer_Graphics_Project
         {
             if (direction == 0)
             {
-                float tempX = Xst;
-                float tempY = Yst;
-                Xst = Xend;
-                Yst = Yend;
-                Xend = tempX;
-                Yend = tempY;
-                calc(); 
-                direction = 1;
-                return true;
+                //float tempX = Xst;
+                //float tempY = Yst;
+                //Xst = Xend;
+                //Yst = Yend;
+                //Xend = tempX;
+                //Yend = tempY;
+                //calc(); 
+                //direction = 1;
+                //return true;
+                return false;
             }
 
             if (Math.Abs(dx) > Math.Abs(dy)) 
