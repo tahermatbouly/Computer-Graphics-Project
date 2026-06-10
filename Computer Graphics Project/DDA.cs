@@ -12,7 +12,7 @@ namespace Computer_Graphics_Project
         public float Xend, Yend;
         public float dy, dx, m;
         public float cx, cy;
-        int speed = 10;
+        int speed = 40;
         int direction = 1;
         public void calc()
         {

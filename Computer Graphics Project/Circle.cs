@@ -24,11 +24,11 @@ namespace Computer_Graphics_Project
             this.big = big;
             if (big == true)
             {
-                pen = new Pen(Color.Black, 5);
+                pen = new Pen(Color.Yellow, 5);
             }
             //else
             //{
-            //    pen = new Pen(Color.Black, 7);
+            //    pen = new Pen(Color.Yellow, 7);
 
             //}
         }
@@ -47,11 +47,11 @@ namespace Computer_Graphics_Project
 
                 if(big == true)
                 {
-                    g.FillEllipse(Brushes.Black, x-7, y-7, 15, 15);
+                    g.FillEllipse(Brushes.Yellow, x-7, y-7, 15, 15);
                 }
                 else
                 {
-                    g.FillEllipse(Brushes.Black, x-3, y-3, 5, 5);
+                    g.FillEllipse(Brushes.Yellow, x-3, y-3, 5, 5);
                 }
 
                 if (i % 10 == 0 && big == true)

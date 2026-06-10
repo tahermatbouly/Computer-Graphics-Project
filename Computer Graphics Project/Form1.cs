@@ -15,8 +15,8 @@ namespace Computer_Graphics_Project
     public interface Road
     {
         void Draw(Graphics g);
-        bool inside(int mouseX, int mouseY);
-        void updatePos(int dx, int dy);
+        //bool inside(int mouseX, int mouseY);
+        //void updatePos(int dx, int dy);
 
         Rectangle getBound();
 
@@ -25,8 +25,7 @@ namespace Computer_Graphics_Project
 
         PointF CalcNextPoint();
 
-        //int x {  get; }
-        //int y { get; }
+        
 
     }
 
@@ -36,7 +35,7 @@ namespace Computer_Graphics_Project
         Circle smallCircle = new Circle(false);
         int centerX;
         int centerY;
-        int ct = 270;
+        int ct = 280;
         //public int x, y;
         string type = "loop";
 
@@ -151,9 +150,9 @@ namespace Computer_Graphics_Project
                 ct+=10;
             }
 
-            p.X = (float)(bigCircle.Rad * Math.Cos(thRadian)) + bigCircle.XC;
+            p.X = (float)(bigCircle.Rad * Math.Cos(thRadian)) + bigCircle.XC - (float)(bigCircle.XC/30);
             p.Y = bigCircle.YC - (float)(bigCircle.Rad * Math.Sin(thRadian));
-            if(ct == 260)
+            if(ct == 270)
             {
                 if (Form1.moveLock + 1 < Form1.road.Count)
                 {
@@ -170,8 +169,8 @@ namespace Computer_Graphics_Project
         public PointF smallPtS, smallPtE;
         public DDA dda = new DDA();
 
-        Pen smallPen = new Pen(Color.Black, 5);
-        Pen bigPen = new Pen(Color.Black, 15);
+        Pen smallPen = new Pen(Color.Yellow, 5);
+        Pen bigPen = new Pen(Color.Yellow, 15);
 
         public Transformation trans = new Transformation();
         public int move = 0;
@@ -245,6 +244,7 @@ namespace Computer_Graphics_Project
                 smallPtE.X += 50;
 
                 Form1.lastPos.X = (int)bigPtE.X;
+                dda.Xend = bigPtE.X;
                 dda.calc();
             }
         }
@@ -257,6 +257,7 @@ namespace Computer_Graphics_Project
                 smallPtE.X -= 50;
 
                 Form1.lastPos.X = (int)bigPtE.X;
+                dda.Xend = bigPtE.X;
                 dda.calc();
 
             }
@@ -282,6 +283,132 @@ namespace Computer_Graphics_Project
         }
     }
 
+    public class Curve : Road
+    {
+        public BezierCurve bigCurve = new BezierCurve(Color.Yellow, true);
+        public BezierCurve smallCurve = new BezierCurve(Color.Yellow, false);
+        float t = 0;
+        Pen pen = new Pen(Color.Yellow, 6);
+
+        public Curve()
+        {
+            
+            bigCurve.SetControlPoint(new Point(Form1.lastPos.X, Form1.lastPos.Y));
+            bigCurve.SetControlPoint(new Point(Form1.lastPos.X + 300, Form1.lastPos.Y - 100));
+            bigCurve.SetControlPoint(new Point(Form1.lastPos.X + 600, Form1.lastPos.Y));
+
+            smallCurve.SetControlPoint(new Point(Form1.lastPos.X, Form1.lastPos.Y - 20));
+            smallCurve.SetControlPoint(new Point(Form1.lastPos.X + 300, Form1.lastPos.Y - 120));
+            smallCurve.SetControlPoint(new Point(Form1.lastPos.X + 600, Form1.lastPos.Y - 20));
+        }
+
+        public PointF CalcNextPoint()
+        {
+            PointF curvePoint = new PointF(0,0);
+            
+            if (t <= 1.0)
+            {
+                curvePoint = bigCurve.CalcCurvePointAtTime(t);
+                t += 0.1f;
+            }
+            else
+            {
+                if (Form1.moveLock + 1 < Form1.road.Count)
+                {
+                    Form1.moveLock++;
+                }
+            }
+            return curvePoint;
+        }
+
+
+        public void Draw(Graphics g)
+        {
+            this.bigCurve.DrawCurve(g);
+            this.smallCurve.DrawCurve(g);
+            int j = 0;
+            for (float i=0; i<=1.0; i+=0.001f)
+            {
+                PointF smallpoint = smallCurve.CalcCurvePointAtTime(i);
+                PointF bigpoint = bigCurve.CalcCurvePointAtTime(i);
+                if (j % 45 == 0)
+                {
+                    g.DrawLine(pen, smallpoint, bigpoint);
+                    
+
+                }
+                j++;
+            }
+            
+        }
+
+        public Rectangle getBound()
+        {
+            int w = smallCurve.GetPoint(2).X - smallCurve.GetPoint(0).X;
+            int h = (smallCurve.GetPoint(0).Y - smallCurve.GetPoint(1).Y);
+            h += h / 2;
+            Rectangle r = new Rectangle(smallCurve.GetPoint(0).X, smallCurve.GetPoint(1).Y, w,h );
+            return r;
+        }
+
+        public void decrease()
+        {
+            if (Form1.verticalCurve)
+            {
+                if (smallCurve.GetPoint(1).Y < Form1.h - 50)
+                {
+                    smallCurve.ModifyCtrlPoint(1, smallCurve.GetPoint(1).X, smallCurve.GetPoint(1).Y + 50);
+                    bigCurve.ModifyCtrlPoint(1, bigCurve.GetPoint(1).X, bigCurve.GetPoint(1).Y + 50);
+
+                }
+            }
+            else
+            {
+                int diff = smallCurve.GetPoint(2).X - smallCurve.GetPoint(0).X;
+                if (diff > 200)
+                {
+                    int median = ((smallCurve.GetPoint(2).X - smallCurve.GetPoint(0).X) / 2) + smallCurve.GetPoint(0).X;
+                    smallCurve.ModifyCtrlPoint(2, smallCurve.GetPoint(2).X - 50, smallCurve.GetPoint(2).Y);
+                    smallCurve.ModifyCtrlPoint(1, median, smallCurve.GetPoint(1).Y);
+
+                    bigCurve.ModifyCtrlPoint(2, bigCurve.GetPoint(2).X - 50, bigCurve.GetPoint(2).Y);
+                    bigCurve.ModifyCtrlPoint(1, median, bigCurve.GetPoint(1).Y);
+
+                    Form1.lastPos.X = smallCurve.GetPoint(2).X;
+                }
+            }
+        }
+
+        public void increase()
+        {
+            if (Form1.verticalCurve)
+            {
+                if (smallCurve.GetPoint(1).Y > 200)
+                {
+                    smallCurve.ModifyCtrlPoint(1, smallCurve.GetPoint(1).X, smallCurve.GetPoint(1).Y - 50);
+                    bigCurve.ModifyCtrlPoint(1, bigCurve.GetPoint(1).X, bigCurve.GetPoint(1).Y - 50);
+
+                }
+            }
+            else
+            {
+                
+                if (smallCurve.GetPoint(2).X < Form1.w - 100)
+                {
+                    int median = ((smallCurve.GetPoint(2).X - smallCurve.GetPoint(0).X) / 2) + smallCurve.GetPoint(0).X;
+                    smallCurve.ModifyCtrlPoint(2, smallCurve.GetPoint(2).X + 50, smallCurve.GetPoint(2).Y);
+                    smallCurve.ModifyCtrlPoint(1, median, smallCurve.GetPoint(1).Y);
+
+                    bigCurve.ModifyCtrlPoint(2, bigCurve.GetPoint(2).X + 50, bigCurve.GetPoint(2).Y);
+                    bigCurve.ModifyCtrlPoint(1, median, bigCurve.GetPoint(1).Y);
+
+                    Form1.lastPos.X = smallCurve.GetPoint(2).X;
+                }
+
+            }
+        }
+    }
+
     public partial class Form1 : Form
     {
         Timer T = new Timer();
@@ -291,15 +418,19 @@ namespace Computer_Graphics_Project
         Point lastMousePos;
         Graphics g, g2;
         public static Point lastPos;
-        PointF ball;
+        PointF car;
+        Bitmap carImage = new Bitmap("car.png");
+        Curve c;
 
         public static int moveLock = 0;
         int selectLock = -1;
 
-        int centerX, centerY, w, h;
+        int centerX, centerY;
+        public static int w, h;
         bool isDrag = false;
         public static bool lastPosChanged = false;
         bool moveFlag = false;
+        public static bool verticalCurve = true;
 
         public Form1()
         {
@@ -339,7 +470,8 @@ namespace Computer_Graphics_Project
         {
             if(moveFlag == true && (road.Count > 0))
             {
-                ball = road[moveLock].CalcNextPoint();
+                car = road[moveLock].CalcNextPoint();
+                car.Y -= 50;
             }
 
             drawdubb(this.CreateGraphics());
@@ -397,7 +529,7 @@ namespace Computer_Graphics_Project
                     }
                     else
                     {
-                        MessageBox.Show("cannot put a loop here, add a line or curve");
+                        MessageBox.Show("cannot put a loop here, add a line first");
                     }
                 }
                 else
@@ -438,7 +570,30 @@ namespace Computer_Graphics_Project
 
                 
             }
-            
+
+            if (e.KeyCode == Keys.C)
+            {
+                if (selectLock == -1)
+                {
+
+                    Curve curve = new Curve();
+                    
+                    road.Add(curve);
+                    selectLock = road.Count - 1;
+                    lastPosChanged = false;
+                    this.Text = lastPos.X + ", " + lastPos.Y;
+                    lastPos.X = curve.bigCurve.GetPoint(2).X;
+                    lastPos.Y = curve.bigCurve.GetPoint(2).Y;
+
+                }
+                else
+                {
+                    MessageBox.Show("Press Enter to confirm the size of this segment before adding a new one");
+                }
+
+
+            }
+
             if (e.KeyCode == Keys.Up)
             {
                 if(selectLock >= 0)
@@ -452,6 +607,15 @@ namespace Computer_Graphics_Project
                 {
                     road[selectLock].decrease();
                 }
+            }
+
+            if (e.KeyCode == Keys.H)
+            {
+                verticalCurve = false;
+            }
+            if (e.KeyCode == Keys.V)
+            {
+                verticalCurve = true;
             }
 
             drawdubb(this.CreateGraphics());
@@ -473,9 +637,10 @@ namespace Computer_Graphics_Project
             centerX = w / 2;
             centerY = h - (h / 4);
             lastPos = new Point(0, centerY);
-            ball = new PointF(0, centerY);
+            car = new PointF(0, centerY - 50);
             moveLock = 0;
 
+            
 
 
 
@@ -509,8 +674,10 @@ namespace Computer_Graphics_Project
 
             if (moveFlag == true)
             {
-                g2.FillEllipse(Brushes.Red, ball.X - 20, ball.Y - 20, 30, 30);
+                //g2.FillEllipse(Brushes.Red, car.X - 20, car.Y - 20, 30, 30);
+                g2.DrawImage(new Bitmap(carImage, 80, 80), car);
             }
+
 
         }
 
