@@ -22,6 +22,8 @@ namespace Computer_Graphics_Project
 
         void increase();
         void decrease();
+        void shiftLeft();
+        void shiftRight();
 
         PointF CalcNextPoint();
 
@@ -161,6 +163,18 @@ namespace Computer_Graphics_Project
             }
             return p;
         }
+
+        public void shiftLeft()
+        {
+            bigCircle.XC -= 50;
+            smallCircle.XC -= 50;
+        }
+
+        public void shiftRight()
+        {
+            bigCircle.XC += 50;
+            smallCircle.XC += 50;
+        }
     }
     public class LineSegment : Road
     {
@@ -243,6 +257,7 @@ namespace Computer_Graphics_Project
 
                 smallPtE.X += 50;
 
+                //Form1.oldLastPos = Form1.lastPos;
                 Form1.lastPos.X = (int)bigPtE.X;
                 dda.Xend = bigPtE.X;
                 dda.calc();
@@ -256,6 +271,7 @@ namespace Computer_Graphics_Project
                 bigPtE.X -= 50;
                 smallPtE.X -= 50;
 
+                //Form1.oldLastPos = Form1.lastPos;
                 Form1.lastPos.X = (int)bigPtE.X;
                 dda.Xend = bigPtE.X;
                 dda.calc();
@@ -280,6 +296,22 @@ namespace Computer_Graphics_Project
                 }
             }
             return new PointF(dda.cx, dda.cy);
+        }
+
+        public void shiftLeft()
+        {
+            smallPtS.X -= 50;
+            smallPtE.X -= 50;
+            bigPtS.X -= 50;
+            bigPtE.X -= 50;
+        }
+
+        public void shiftRight()
+        {
+            smallPtS.X += 50;
+            smallPtE.X += 50;
+            bigPtS.X += 50;
+            bigPtE.X += 50;
         }
     }
 
@@ -374,6 +406,7 @@ namespace Computer_Graphics_Project
                     bigCurve.ModifyCtrlPoint(2, bigCurve.GetPoint(2).X - 50, bigCurve.GetPoint(2).Y);
                     bigCurve.ModifyCtrlPoint(1, median, bigCurve.GetPoint(1).Y);
 
+                    //Form1.oldLastPos = Form1.lastPos;
                     Form1.lastPos.X = smallCurve.GetPoint(2).X;
                 }
             }
@@ -402,22 +435,46 @@ namespace Computer_Graphics_Project
                     bigCurve.ModifyCtrlPoint(2, bigCurve.GetPoint(2).X + 50, bigCurve.GetPoint(2).Y);
                     bigCurve.ModifyCtrlPoint(1, median, bigCurve.GetPoint(1).Y);
 
+                    //Form1.oldLastPos = Form1.lastPos;
                     Form1.lastPos.X = smallCurve.GetPoint(2).X;
                 }
 
             }
+        }
+
+        public void shiftLeft()
+        {
+            smallCurve.ModifyCtrlPoint(0, smallCurve.GetPoint(0).X - 50, smallCurve.GetPoint(0).Y);
+            smallCurve.ModifyCtrlPoint(1, smallCurve.GetPoint(1).X - 50, smallCurve.GetPoint(1).Y);
+            smallCurve.ModifyCtrlPoint(2, smallCurve.GetPoint(2).X - 50, smallCurve.GetPoint(2).Y);
+
+            bigCurve.ModifyCtrlPoint(0, bigCurve.GetPoint(0).X - 50, bigCurve.GetPoint(0).Y);
+            bigCurve.ModifyCtrlPoint(1, bigCurve.GetPoint(1).X - 50, bigCurve.GetPoint(1).Y);
+            bigCurve.ModifyCtrlPoint(2, bigCurve.GetPoint(2).X - 50, bigCurve.GetPoint(2).Y);
+        }
+
+        public void shiftRight()
+        {
+            smallCurve.ModifyCtrlPoint(0, smallCurve.GetPoint(0).X + 50, smallCurve.GetPoint(0).Y);
+            smallCurve.ModifyCtrlPoint(1, smallCurve.GetPoint(1).X + 50, smallCurve.GetPoint(1).Y);
+            smallCurve.ModifyCtrlPoint(2, smallCurve.GetPoint(2).X + 50, smallCurve.GetPoint(2).Y);
+
+            bigCurve.ModifyCtrlPoint(0, bigCurve.GetPoint(0).X + 50, bigCurve.GetPoint(0).Y);
+            bigCurve.ModifyCtrlPoint(1, bigCurve.GetPoint(1).X + 50, bigCurve.GetPoint(1).Y);
+            bigCurve.ModifyCtrlPoint(2, bigCurve.GetPoint(2).X + 50, bigCurve.GetPoint(2).Y);
         }
     }
 
     public partial class Form1 : Form
     {
         Timer T = new Timer();
-        Bitmap image = new Bitmap("wallpaper.jpg");
+        Bitmap image = new Bitmap("wallpaper2.jpg");
         Bitmap buffer;
         public static List<Road> road = new List<Road>();
         Point lastMousePos;
         Graphics g, g2;
         public static Point lastPos;
+        public static Point oldLastPos;
         PointF car;
         Bitmap carImage = new Bitmap("car.png");
         Curve c;
@@ -431,6 +488,7 @@ namespace Computer_Graphics_Project
         public static bool lastPosChanged = false;
         bool moveFlag = false;
         public static bool verticalCurve = true;
+        int scroll = 0;
 
         public Form1()
         {
@@ -559,6 +617,8 @@ namespace Computer_Graphics_Project
                     selectLock = road.Count - 1;
                     lastPosChanged = true;
                     this.Text = lastPos.X + ", " + lastPos.Y;
+
+                    oldLastPos = lastPos;
                     lastPos.X = (int)line.bigPtE.X;
                     lastPos.Y = (int)line.bigPtE.Y;
 
@@ -582,6 +642,8 @@ namespace Computer_Graphics_Project
                     selectLock = road.Count - 1;
                     lastPosChanged = false;
                     this.Text = lastPos.X + ", " + lastPos.Y;
+
+                    oldLastPos = lastPos;
                     lastPos.X = curve.bigCurve.GetPoint(2).X;
                     lastPos.Y = curve.bigCurve.GetPoint(2).Y;
 
@@ -617,6 +679,53 @@ namespace Computer_Graphics_Project
             {
                 verticalCurve = true;
             }
+
+            if (e.KeyCode == Keys.X)
+            {
+                scroll += 100;
+
+                for(int i=0; i<road.Count; i++)
+                {
+                    road[i].shiftLeft();
+                }
+
+                //oldLastPos = lastPos;
+                lastPos.X -= 50;
+            }
+
+            if (e.KeyCode == Keys.Z)
+            {
+                if (scroll > 100)
+                {
+                    scroll -= 100;
+
+                    for (int i = 0; i < road.Count; i++)
+                    {
+                        road[i].shiftRight();
+                    }
+
+                    //oldLastPos = lastPos;
+                    lastPos.X += 50;
+                }
+            }
+
+            //if(e.KeyCode == Keys.Escape)
+            //{
+            //    if (selectLock != -1 && road.Count > 0)
+            //    {
+            //        selectLock = -1;
+                    
+            //        if (lastPosChanged == false)
+            //        {
+            //            lastPosChanged = true;
+            //        }
+            //        else
+            //        {
+            //            lastPos = oldLastPos;
+            //        }
+            //        road.RemoveAt(road.Count - 1);
+            //    }
+            //}
 
             drawdubb(this.CreateGraphics());
         }
@@ -654,7 +763,7 @@ namespace Computer_Graphics_Project
 
             g2.DrawImage(image,            // source
                new Rectangle(0, 0, w, h), // where to draw in new bitmap
-               new Rectangle(0, 0, image.Width, image.Height),// what part to copy from source
+               new Rectangle(0+scroll, 0, 7680+scroll, 4320),// what part to copy from source
                GraphicsUnit.Pixel       // unit type (pixels)
              );
 
