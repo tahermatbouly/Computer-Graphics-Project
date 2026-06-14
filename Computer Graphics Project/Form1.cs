@@ -14,16 +14,16 @@ namespace Computer_Graphics_Project
 {
     public interface Road
     {
-        void Draw(Graphics g);
         //bool inside(int mouseX, int mouseY);
         //void updatePos(int dx, int dy);
 
+        void Draw(Graphics g);
         Rectangle getBound();
 
         void increase();
         void decrease();
-        void shiftLeft();
-        void shiftRight();
+        void shiftLeft(int x);
+        void shiftRight(int x);
 
         PointF CalcNextPoint();
 
@@ -38,7 +38,6 @@ namespace Computer_Graphics_Project
         int centerX;
         int centerY;
         int ct = 280;
-        //public int x, y;
         string type = "loop";
 
        public Loop(int centerX, int centerY)
@@ -60,8 +59,7 @@ namespace Computer_Graphics_Project
             smallCircle.end = 360;
             smallCircle.Rad = bigCircle.Rad - (bigCircle.Rad / 9);
 
-            //this.x = centerX - bigCircle.Rad;
-            //this.y = centerY - smallCircle.Rad;
+            
         }
 
         public void Draw(Graphics g)
@@ -70,37 +68,9 @@ namespace Computer_Graphics_Project
             smallCircle.Drawcircle(g);
         }
 
-        public bool inside(int mouseX, int mouseY)
-        {
+        
 
-            float inside = ((mouseX - centerX) * (mouseX - centerX)) + ((mouseY - centerY) * (mouseY - centerY)) - (bigCircle.Rad * bigCircle.Rad);
-
-            if (inside < 0)
-            {
-                //MessageBox.Show("True");
-                return true;
-            }
-            else
-            {
-                //MessageBox.Show("False");
-                return false;
-            }
-
-
-        }
-
-        public void updatePos(int dx, int dy)
-        {
-            centerX += dx;
-            centerY += dy;
-
-            bigCircle.XC += dx;
-            bigCircle.YC += dy;
-
-            smallCircle.XC += dx;
-            smallCircle.YC += dy;
-
-        }
+        
 
         public Rectangle getBound()
         {
@@ -149,7 +119,7 @@ namespace Computer_Graphics_Project
             }
             else
             {
-                ct+=10;
+                ct+=5;
             }
 
             p.X = (float)(bigCircle.Rad * Math.Cos(thRadian)) + bigCircle.XC - (float)(bigCircle.XC/30);
@@ -164,29 +134,29 @@ namespace Computer_Graphics_Project
             return p;
         }
 
-        public void shiftLeft()
+        public void shiftLeft(int x)
         {
-            bigCircle.XC -= 50;
-            smallCircle.XC -= 50;
+            bigCircle.XC -= x;
+            smallCircle.XC -= x;
         }
 
-        public void shiftRight()
+        public void shiftRight(int x)
         {
-            bigCircle.XC += 50;
-            smallCircle.XC += 50;
+            bigCircle.XC += x;
+            smallCircle.XC += x;
         }
     }
     public class LineSegment : Road
     {
-        public PointF ptS, ptE;
+        //public PointF ptS, ptE;
         public PointF bigPtS, bigPtE;
         public PointF smallPtS, smallPtE;
         public DDA dda = new DDA();
 
-        Pen smallPen = new Pen(Color.Yellow, 5);
-        Pen bigPen = new Pen(Color.Yellow, 15);
+        Pen smallPen = new Pen(Color.Orange, 5);
+        Pen bigPen = new Pen(Color.Orange, 15);
 
-        public Transformation trans = new Transformation();
+        //public Transformation trans = new Transformation();
         public int move = 0;
         string type = "line";
 
@@ -216,32 +186,9 @@ namespace Computer_Graphics_Project
             }
         }
 
-        public bool inside(int mouseX, int mouseY)
-        {
-            if ((mouseX >= bigPtS.X && mouseX <= bigPtE.X) && (mouseY <= bigPtS.Y && mouseY >= smallPtS.Y))
-            {
-                //MessageBox.Show("found line");
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
+        
 
-        public void updatePos(int dx, int dy)
-        {
-            bigPtS.X += dx;
-            bigPtS.Y += dy;
-            bigPtE.X += dx;
-            bigPtE.Y += dy;
-
-            smallPtS.X += dx;
-            smallPtS.Y += dy;
-            smallPtE.X += dx;
-            smallPtE.Y += dy;
-
-        }
+        
 
         public Rectangle getBound()
         {
@@ -298,29 +245,65 @@ namespace Computer_Graphics_Project
             return new PointF(dda.cx, dda.cy);
         }
 
-        public void shiftLeft()
+        public void shiftLeft(int x)
         {
-            smallPtS.X -= 50;
-            smallPtE.X -= 50;
-            bigPtS.X -= 50;
-            bigPtE.X -= 50;
+            smallPtS.X -= x;
+            smallPtE.X -= x;
+            bigPtS.X -= x;
+            bigPtE.X -= x;
+
+            dda.Xst = bigPtS.X;
+            dda.Xend = bigPtE.X;
+
+            float cx = dda.cx;
+            float Xst = dda.Xst;
+            float portion = cx ;
+            if (cx - Xst != x)
+            {
+                portion = cx - Xst;
+            }
+            else
+            {
+                portion = 0;
+            }
+
+            dda.calc();
+            dda.cx += portion;
+
+            //for(int i = 0; i < cx - Xst; i++)
+            //{
+            //    dda.CalcNextPoint();
+            //}
         }
 
-        public void shiftRight()
+        public void shiftRight(int x)
         {
-            smallPtS.X += 50;
-            smallPtE.X += 50;
-            bigPtS.X += 50;
-            bigPtE.X += 50;
+            smallPtS.X += x;
+            smallPtE.X += x;
+            bigPtS.X += x;
+            bigPtE.X += x;
+
+            dda.Xst = bigPtS.X;
+            dda.Xend = bigPtE.X;
+
+            float cx = dda.cx;
+            float Xst = dda.Xst;
+            dda.calc();
+            //dda.cx += cx - Xst;
+
+            //for (int i = 0; i < cx - Xst; i++)
+            //{
+            //    dda.CalcNextPoint();
+            //}
         }
     }
 
     public class Curve : Road
     {
-        public BezierCurve bigCurve = new BezierCurve(Color.Yellow, true);
-        public BezierCurve smallCurve = new BezierCurve(Color.Yellow, false);
+        public BezierCurve bigCurve = new BezierCurve(Color.Orange, true);
+        public BezierCurve smallCurve = new BezierCurve(Color.Orange, false);
         float t = 0;
-        Pen pen = new Pen(Color.Yellow, 6);
+        Pen pen = new Pen(Color.Orange, 6);
 
         public Curve()
         {
@@ -341,7 +324,7 @@ namespace Computer_Graphics_Project
             if (t <= 1.0)
             {
                 curvePoint = bigCurve.CalcCurvePointAtTime(t);
-                t += 0.1f;
+                t += 0.01f;
             }
             else
             {
@@ -442,33 +425,33 @@ namespace Computer_Graphics_Project
             }
         }
 
-        public void shiftLeft()
+        public void shiftLeft(int x)
         {
-            smallCurve.ModifyCtrlPoint(0, smallCurve.GetPoint(0).X - 50, smallCurve.GetPoint(0).Y);
-            smallCurve.ModifyCtrlPoint(1, smallCurve.GetPoint(1).X - 50, smallCurve.GetPoint(1).Y);
-            smallCurve.ModifyCtrlPoint(2, smallCurve.GetPoint(2).X - 50, smallCurve.GetPoint(2).Y);
+            smallCurve.ModifyCtrlPoint(0, smallCurve.GetPoint(0).X - x, smallCurve.GetPoint(0).Y);
+            smallCurve.ModifyCtrlPoint(1, smallCurve.GetPoint(1).X - x, smallCurve.GetPoint(1).Y);
+            smallCurve.ModifyCtrlPoint(2, smallCurve.GetPoint(2).X - x, smallCurve.GetPoint(2).Y);
 
-            bigCurve.ModifyCtrlPoint(0, bigCurve.GetPoint(0).X - 50, bigCurve.GetPoint(0).Y);
-            bigCurve.ModifyCtrlPoint(1, bigCurve.GetPoint(1).X - 50, bigCurve.GetPoint(1).Y);
-            bigCurve.ModifyCtrlPoint(2, bigCurve.GetPoint(2).X - 50, bigCurve.GetPoint(2).Y);
+            bigCurve.ModifyCtrlPoint(0, bigCurve.GetPoint(0).X - x, bigCurve.GetPoint(0).Y);
+            bigCurve.ModifyCtrlPoint(1, bigCurve.GetPoint(1).X - x, bigCurve.GetPoint(1).Y);
+            bigCurve.ModifyCtrlPoint(2, bigCurve.GetPoint(2).X - x, bigCurve.GetPoint(2).Y);
         }
 
-        public void shiftRight()
+        public void shiftRight(int x)
         {
-            smallCurve.ModifyCtrlPoint(0, smallCurve.GetPoint(0).X + 50, smallCurve.GetPoint(0).Y);
-            smallCurve.ModifyCtrlPoint(1, smallCurve.GetPoint(1).X + 50, smallCurve.GetPoint(1).Y);
-            smallCurve.ModifyCtrlPoint(2, smallCurve.GetPoint(2).X + 50, smallCurve.GetPoint(2).Y);
+            smallCurve.ModifyCtrlPoint(0, smallCurve.GetPoint(0).X + x, smallCurve.GetPoint(0).Y);
+            smallCurve.ModifyCtrlPoint(1, smallCurve.GetPoint(1).X + x, smallCurve.GetPoint(1).Y);
+            smallCurve.ModifyCtrlPoint(2, smallCurve.GetPoint(2).X + x, smallCurve.GetPoint(2).Y);
 
-            bigCurve.ModifyCtrlPoint(0, bigCurve.GetPoint(0).X + 50, bigCurve.GetPoint(0).Y);
-            bigCurve.ModifyCtrlPoint(1, bigCurve.GetPoint(1).X + 50, bigCurve.GetPoint(1).Y);
-            bigCurve.ModifyCtrlPoint(2, bigCurve.GetPoint(2).X + 50, bigCurve.GetPoint(2).Y);
+            bigCurve.ModifyCtrlPoint(0, bigCurve.GetPoint(0).X + x, bigCurve.GetPoint(0).Y);
+            bigCurve.ModifyCtrlPoint(1, bigCurve.GetPoint(1).X + x, bigCurve.GetPoint(1).Y);
+            bigCurve.ModifyCtrlPoint(2, bigCurve.GetPoint(2).X + x, bigCurve.GetPoint(2).Y);
         }
     }
 
     public partial class Form1 : Form
     {
         Timer T = new Timer();
-        Bitmap image = new Bitmap("wallpaper2.jpg");
+        Bitmap image = new Bitmap("cover.png");
         Bitmap buffer;
         public static List<Road> road = new List<Road>();
         Point lastMousePos;
@@ -489,6 +472,9 @@ namespace Computer_Graphics_Project
         bool moveFlag = false;
         public static bool verticalCurve = true;
         int scroll = 0;
+        bool start = false;
+        int scrollct = 0;
+        bool dynamicScroll = false;
 
         public Form1()
         {
@@ -526,8 +512,30 @@ namespace Computer_Graphics_Project
 
         private void T_Tick(object sender, EventArgs e)
         {
-            if(moveFlag == true && (road.Count > 0))
+            //if (car.X > centerX)
+            //{
+            //    dynamicScroll = true;
+            //}
+
+                if (moveFlag == true && (road.Count > 0))
             {
+                if (car.X > centerX)
+                {
+                    if (scroll < (1536 * 2) - 100)
+                    {
+                        scroll += 25;
+
+                        for (int i = 0; i < road.Count; i++)
+                        {
+                            road[i].shiftLeft(25);
+                        }
+
+                        //oldLastPos = lastPos;
+                        //lastPos.X -= 50;
+                        //scrollct++;
+                        car.X -= 25;
+                    }
+                }
                 car = road[moveLock].CalcNextPoint();
                 car.Y -= 50;
             }
@@ -563,169 +571,183 @@ namespace Computer_Graphics_Project
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Enter)
+            if(e.KeyCode == Keys.R)
             {
-                selectLock = -1;
+                image = new Bitmap("wallpaper.png");
+                start = true;
             }
 
-            if (e.KeyCode == Keys.Space)
+            if (start)
             {
-                moveFlag = true;
-            }
-
-            if (e.KeyCode == Keys.L)
-            {
-                if(selectLock == -1)
+                if (e.KeyCode == Keys.Enter)
                 {
-                    if (lastPosChanged == true)
+                    selectLock = -1;
+                }
+
+                if (e.KeyCode == Keys.Space)
+                {
+                    if (moveFlag == false)
                     {
-                        Loop loop = new Loop(lastPos.X, lastPos.Y - 200);
-                        road.Add(loop);
-                        selectLock = road.Count - 1;
-                        lastPosChanged = false;
-                        this.Text = lastPos.X + ", " + lastPos.Y;
+                        scroll = 0;
+                        for (int i = 0; i < scrollct; i++)
+                        {
+                            for (int j = 0; j < road.Count; j++)
+                            {
+                                road[j].shiftRight(100);
+                            }
+                        }
+                        moveFlag = true;
+                        scrollct = 0;
+                    }
+                }
+            
+
+                if (e.KeyCode == Keys.L)
+                {
+                    if (selectLock == -1)
+                    {
+                        if (lastPosChanged == true)
+                        {
+                            Loop loop = new Loop(lastPos.X, lastPos.Y - 200);
+                            road.Add(loop);
+                            selectLock = road.Count - 1;
+                            lastPosChanged = false;
+                            this.Text = lastPos.X + ", " + lastPos.Y;
+                        }
+                        else
+                        {
+                            MessageBox.Show("cannot put a loop here, add a line first");
+                        }
                     }
                     else
                     {
-                        MessageBox.Show("cannot put a loop here, add a line first");
+                        MessageBox.Show("Press Enter to confirm the size of this segment before adding a new one");
                     }
-                }
-                else
-                {
-                    MessageBox.Show("Press Enter to confirm the size of this segment before adding a new one");
+
                 }
 
+
+                if (e.KeyCode == Keys.S)
+                {
+                    if (lastPos.X < 1536)
+                    {
+                        if (selectLock == -1)
+                        {
+
+                            LineSegment line = new LineSegment();
+
+                            road.Add(line);
+                            selectLock = road.Count - 1;
+                            lastPosChanged = true;
+                            this.Text = lastPos.X + ", " + lastPos.Y;
+
+                            //oldLastPos = lastPos;
+                            lastPos.X = (int)line.bigPtE.X;
+                            lastPos.Y = (int)line.bigPtE.Y;
+
+                        }
+                        else
+                        {
+                            MessageBox.Show("Press Enter to confirm the size of this segment before adding a new one");
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("You have reached the end");
+
+                    }
+
+
+                }
+
+                if (e.KeyCode == Keys.C)
+                {
+                    if (lastPos.X < 1536)
+                    {
+                        if (selectLock == -1)
+                        {
+
+                            Curve curve = new Curve();
+
+                            road.Add(curve);
+                            selectLock = road.Count - 1;
+                            lastPosChanged = false;
+                            this.Text = lastPos.X + ", " + lastPos.Y;
+
+                            oldLastPos = lastPos;
+                            lastPos.X = curve.bigCurve.GetPoint(2).X;
+                            lastPos.Y = curve.bigCurve.GetPoint(2).Y;
+
+                        }
+                        else
+                        {
+                            MessageBox.Show("Press Enter to confirm the size of this segment before adding a new one");
+                        }
+                    }
+
+
+                }
+
+                if (e.KeyCode == Keys.Up)
+                {
+                    if (selectLock >= 0)
+                    {
+                        road[selectLock].increase();
+                    }
+                }
+                if (e.KeyCode == Keys.Down)
+                {
+                    if (selectLock >= 0)
+                    {
+                        road[selectLock].decrease();
+                    }
+                }
+
+                if (e.KeyCode == Keys.H)
+                {
+                    verticalCurve = false;
+                }
+                if (e.KeyCode == Keys.V)
+                {
+                    verticalCurve = true;
+                }
+
+                if (e.KeyCode == Keys.X)
+                {
+                    if (scroll < (1536*2) - 100)
+                    {
+                        scroll += 100;
+
+                        for (int i = 0; i < road.Count; i++)
+                        {
+                            road[i].shiftLeft(100);
+                        }
+
+                        //oldLastPos = lastPos;
+                        lastPos.X -= 100;
+                        scrollct++;
+                    }
+                }
+
+                if (e.KeyCode == Keys.Z)
+                {
+                    if (scroll > 100)
+                    {
+                        scroll -= 100;
+
+                        for (int i = 0; i < road.Count; i++)
+                        {
+                            road[i].shiftRight(100);
+                        }
+
+                        //oldLastPos = lastPos;
+                        lastPos.X += 100;
+                        scrollct--;
+
+                    }
+                }
             }
             
-
-            if (e.KeyCode == Keys.S)
-            {
-                if (selectLock == -1)
-                {
-
-                    LineSegment line = new LineSegment();
-                    //line.bigPtS = new PointF(lastPos.X, lastPos.Y);
-                    //line.bigPtE = new PointF(lastPos.X + 400, lastPos.Y);
-                    //line.smallPtS = new PointF((float)lastPos.X, (float)lastPos.Y - 20);
-                    //line.smallPtE = new PointF((float)lastPos.X + 400, (float)lastPos.Y - 20);
-                    //line.dda.Xst = line.bigPtS.X;
-                    //line.dda.Yst = line.bigPtS.Y;
-                    //line.dda.Xend = line.bigPtE.X;
-                    //line.dda.Yend = line.bigPtE.Y;
-                    //line.dda.calc();
-                    road.Add(line);
-                    selectLock = road.Count - 1;
-                    lastPosChanged = true;
-                    this.Text = lastPos.X + ", " + lastPos.Y;
-
-                    oldLastPos = lastPos;
-                    lastPos.X = (int)line.bigPtE.X;
-                    lastPos.Y = (int)line.bigPtE.Y;
-
-                }
-                else
-                {
-                    MessageBox.Show("Press Enter to confirm the size of this segment before adding a new one");
-                }
-
-                
-            }
-
-            if (e.KeyCode == Keys.C)
-            {
-                if (selectLock == -1)
-                {
-
-                    Curve curve = new Curve();
-                    
-                    road.Add(curve);
-                    selectLock = road.Count - 1;
-                    lastPosChanged = false;
-                    this.Text = lastPos.X + ", " + lastPos.Y;
-
-                    oldLastPos = lastPos;
-                    lastPos.X = curve.bigCurve.GetPoint(2).X;
-                    lastPos.Y = curve.bigCurve.GetPoint(2).Y;
-
-                }
-                else
-                {
-                    MessageBox.Show("Press Enter to confirm the size of this segment before adding a new one");
-                }
-
-
-            }
-
-            if (e.KeyCode == Keys.Up)
-            {
-                if(selectLock >= 0)
-                {
-                    road[selectLock].increase();
-                }
-            }
-            if (e.KeyCode == Keys.Down)
-            {
-                if (selectLock >= 0)
-                {
-                    road[selectLock].decrease();
-                }
-            }
-
-            if (e.KeyCode == Keys.H)
-            {
-                verticalCurve = false;
-            }
-            if (e.KeyCode == Keys.V)
-            {
-                verticalCurve = true;
-            }
-
-            if (e.KeyCode == Keys.X)
-            {
-                scroll += 100;
-
-                for(int i=0; i<road.Count; i++)
-                {
-                    road[i].shiftLeft();
-                }
-
-                //oldLastPos = lastPos;
-                lastPos.X -= 50;
-            }
-
-            if (e.KeyCode == Keys.Z)
-            {
-                if (scroll > 100)
-                {
-                    scroll -= 100;
-
-                    for (int i = 0; i < road.Count; i++)
-                    {
-                        road[i].shiftRight();
-                    }
-
-                    //oldLastPos = lastPos;
-                    lastPos.X += 50;
-                }
-            }
-
-            //if(e.KeyCode == Keys.Escape)
-            //{
-            //    if (selectLock != -1 && road.Count > 0)
-            //    {
-            //        selectLock = -1;
-                    
-            //        if (lastPosChanged == false)
-            //        {
-            //            lastPosChanged = true;
-            //        }
-            //        else
-            //        {
-            //            lastPos = oldLastPos;
-            //        }
-            //        road.RemoveAt(road.Count - 1);
-            //    }
-            //}
 
             drawdubb(this.CreateGraphics());
         }
@@ -763,7 +785,7 @@ namespace Computer_Graphics_Project
 
             g2.DrawImage(image,            // source
                new Rectangle(0, 0, w, h), // where to draw in new bitmap
-               new Rectangle(0+scroll, 0, 7680+scroll, 4320),// what part to copy from source
+               new Rectangle(scroll, 0, 1536, 1024),// what part to copy from source
                GraphicsUnit.Pixel       // unit type (pixels)
              );
 
@@ -806,7 +828,7 @@ namespace Computer_Graphics_Project
             buffer = new Bitmap(w, h);
             g2 = Graphics.FromImage(buffer);
             drawscene(g2);
-            g.DrawImage(buffer, 0, 0, w, h);
+            g.DrawImage(buffer, 0, 0);
         }
     }
 }
