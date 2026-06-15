@@ -150,7 +150,7 @@ namespace Computer_Graphics_Project
 
         public void rotateLeft()
         {
-            throw new NotImplementedException();
+            return;
         }
 
         public void rotateRight()
@@ -189,15 +189,15 @@ namespace Computer_Graphics_Project
         {
             g.DrawLine(bigPen, bigPtS.X, bigPtS.Y, bigPtE.X, bigPtE.Y);
             g.DrawLine(smallPen, smallPtS.X, smallPtS.Y, smallPtE.X, smallPtE.Y);
-            //for(int i = (int)bigPtS.X; i < (int)bigPtE.X - (int)bigPtS.X; i++)
-            //{
+            for (int i = (int)bigPtS.X; i < (int)bigPtE.X; i++)
+            {
 
-            //    if (i % 25 == 0)
-            //    {
-            //        //g.DrawLine(smallPen, i, bigPtS.Y, i, smallPtS.Y);
-            //        g.DrawLine(smallPen, this.dda.)
-            //    }
-            //}
+                if (i % 25 == 0)
+                {
+                    g.DrawLine(smallPen, i, bigPtS.Y, i, smallPtS.Y);
+                    //g.DrawLine(smallPen, this.dda.)
+                }
+            }
         }
 
         
@@ -313,46 +313,46 @@ namespace Computer_Graphics_Project
 
         public void rotateLeft()
         {
-            LineSegment newlineB = this.trans.RotateRight(this, this.bigPtS.X, this.bigPtS.Y, -0.1f);
-            this.bigPtS = newlineB.bigPtS;
-            this.bigPtE = newlineB.bigPtE;
+            //LineSegment newlineB = this.trans.RotateRight(this, this.bigPtS.X, this.bigPtS.Y, -0.1f);
+            //this.bigPtS = newlineB.bigPtS;
+            //this.bigPtE = newlineB.bigPtE;
 
-            LineSegment newlineS = this.trans.RotateRight(this, this.smallPtS.X, this.smallPtS.Y, -0.1f);
-            this.smallPtS = newlineS.smallPtS;
-            this.smallPtE = newlineS.smallPtE;
+            //LineSegment newlineS = this.trans.RotateRight(this, this.smallPtS.X, this.smallPtS.Y, -0.1f);
+            //this.smallPtS = newlineS.smallPtS;
+            //this.smallPtE = newlineS.smallPtE;
 
-            this.dda.Xst = newlineB.dda.Xst;
-            this.dda.Xend = newlineB.dda.Xend;
-            this.dda.Yst = newlineB.dda.Yst;
-            this.dda.Yend = newlineB.dda.Yend;
-            this.dda.calc();
+            //this.dda.Xst = newlineB.dda.Xst;
+            //this.dda.Xend = newlineB.dda.Xend;
+            //this.dda.Yst = newlineB.dda.Yst;
+            //this.dda.Yend = newlineB.dda.Yend;
+            //this.dda.calc();
 
 
-            Form1.lastPos.X = (int)this.bigPtE.X;
-            Form1.lastPos.Y = (int)this.bigPtE.Y;
+            //Form1.lastPos.X = (int)this.bigPtE.X;
+            //Form1.lastPos.Y = (int)this.bigPtE.Y;
 
 
         }
 
         public void rotateRight()
         {
-            LineSegment newlineB = this.trans.RotateRight(this, this.bigPtS.X, this.bigPtS.Y, 0.1f);
-            this.bigPtS = newlineB.bigPtS;
-            this.bigPtE = newlineB.bigPtE;
+            //LineSegment newlineB = this.trans.RotateRight(this, this.bigPtS.X, this.bigPtS.Y, 0.1f);
+            //this.bigPtS = newlineB.bigPtS;
+            //this.bigPtE = newlineB.bigPtE;
 
-            LineSegment newlineS = this.trans.RotateRight(this, this.smallPtS.X, this.smallPtS.Y, 0.1f);
-            this.smallPtS = newlineS.smallPtS;
-            this.smallPtE = newlineS.smallPtE;
+            //LineSegment newlineS = this.trans.RotateRight(this, this.smallPtS.X, this.smallPtS.Y, 0.1f);
+            //this.smallPtS = newlineS.smallPtS;
+            //this.smallPtE = newlineS.smallPtE;
 
-            this.dda.Xst = newlineB.dda.Xst;
-            this.dda.Xend = newlineB.dda.Xend;
-            this.dda.Yst = newlineB.dda.Yst;
-            this.dda.Yend = newlineB.dda.Yend;
-            this.dda.calc();
+            //this.dda.Xst = newlineB.dda.Xst;
+            //this.dda.Xend = newlineB.dda.Xend;
+            //this.dda.Yst = newlineB.dda.Yst;
+            //this.dda.Yend = newlineB.dda.Yend;
+            //this.dda.calc();
 
 
-            Form1.lastPos.X = (int)this.bigPtE.X;
-            Form1.lastPos.Y = (int)this.bigPtE.Y;
+            //Form1.lastPos.X = (int)this.bigPtE.X;
+            //Form1.lastPos.Y = (int)this.bigPtE.Y;
         }
     }
 
@@ -379,7 +379,7 @@ namespace Computer_Graphics_Project
         {
             PointF curvePoint = new PointF(0,0);
             
-            if (t <= 1.0)
+            if (t < 1.0)
             {
                 curvePoint = bigCurve.CalcCurvePointAtTime(t);
                 t += 0.1f;
@@ -507,12 +507,12 @@ namespace Computer_Graphics_Project
 
         public void rotateLeft()
         {
-            throw new NotImplementedException();
+            return;
         }
 
         public void rotateRight()
         {
-            throw new NotImplementedException();
+            return;
         }
     }
 
@@ -587,9 +587,11 @@ namespace Computer_Graphics_Project
 
                 if (moveFlag == true && (road.Count > 0))
                 {
+                if (moveLock < road.Count)
+                {
                     if (car.X > centerX)
                     {
-                        if (scroll < (1536 * 2) - 100)
+                        if (scroll < (1536 * 2) - 100 && moveLock < road.Count -1)
                         {
                             scroll += 25;
 
@@ -606,6 +608,7 @@ namespace Computer_Graphics_Project
                     }
                     car = road[moveLock].CalcNextPoint();
                     car.Y -= 50;
+                }
                 }
 
             drawdubb(this.CreateGraphics());
