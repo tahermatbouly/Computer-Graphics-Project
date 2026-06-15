@@ -24,6 +24,8 @@ namespace Computer_Graphics_Project
         void decrease();
         void shiftLeft(int x);
         void shiftRight(int x);
+        void rotateLeft();
+        void rotateRight();
 
         PointF CalcNextPoint();
 
@@ -81,7 +83,7 @@ namespace Computer_Graphics_Project
 
         public void increase()
         {
-            if (smallCircle.Rad < 300)
+            if (smallCircle.YC - smallCircle.Rad > 100)
             {
                 bigCircle.Rad += 50;
                 bigCircle.Rad2 += 50;
@@ -145,6 +147,16 @@ namespace Computer_Graphics_Project
             bigCircle.XC += x;
             smallCircle.XC += x;
         }
+
+        public void rotateLeft()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void rotateRight()
+        {
+            return;
+        }
     }
     public class LineSegment : Road
     {
@@ -156,7 +168,7 @@ namespace Computer_Graphics_Project
         Pen smallPen = new Pen(Color.Orange, 5);
         Pen bigPen = new Pen(Color.Orange, 15);
 
-        //public Transformation trans = new Transformation();
+        public Transformation trans = new Transformation();
         public int move = 0;
         string type = "line";
 
@@ -177,13 +189,15 @@ namespace Computer_Graphics_Project
         {
             g.DrawLine(bigPen, bigPtS.X, bigPtS.Y, bigPtE.X, bigPtE.Y);
             g.DrawLine(smallPen, smallPtS.X, smallPtS.Y, smallPtE.X, smallPtE.Y);
-            for(int i = (int)bigPtS.X; i < (int)bigPtE.X; i++)
-            {
-                if(i % 25 == 0)
-                {
-                    g.DrawLine(smallPen, i, bigPtS.Y, i, smallPtS.Y);
-                }
-            }
+            //for(int i = (int)bigPtS.X; i < (int)bigPtE.X - (int)bigPtS.X; i++)
+            //{
+
+            //    if (i % 25 == 0)
+            //    {
+            //        //g.DrawLine(smallPen, i, bigPtS.Y, i, smallPtS.Y);
+            //        g.DrawLine(smallPen, this.dda.)
+            //    }
+            //}
         }
 
         
@@ -296,6 +310,50 @@ namespace Computer_Graphics_Project
             //    dda.CalcNextPoint();
             //}
         }
+
+        public void rotateLeft()
+        {
+            LineSegment newlineB = this.trans.RotateRight(this, this.bigPtS.X, this.bigPtS.Y, -0.1f);
+            this.bigPtS = newlineB.bigPtS;
+            this.bigPtE = newlineB.bigPtE;
+
+            LineSegment newlineS = this.trans.RotateRight(this, this.smallPtS.X, this.smallPtS.Y, -0.1f);
+            this.smallPtS = newlineS.smallPtS;
+            this.smallPtE = newlineS.smallPtE;
+
+            this.dda.Xst = newlineB.dda.Xst;
+            this.dda.Xend = newlineB.dda.Xend;
+            this.dda.Yst = newlineB.dda.Yst;
+            this.dda.Yend = newlineB.dda.Yend;
+            this.dda.calc();
+
+
+            Form1.lastPos.X = (int)this.bigPtE.X;
+            Form1.lastPos.Y = (int)this.bigPtE.Y;
+
+
+        }
+
+        public void rotateRight()
+        {
+            LineSegment newlineB = this.trans.RotateRight(this, this.bigPtS.X, this.bigPtS.Y, 0.1f);
+            this.bigPtS = newlineB.bigPtS;
+            this.bigPtE = newlineB.bigPtE;
+
+            LineSegment newlineS = this.trans.RotateRight(this, this.smallPtS.X, this.smallPtS.Y, 0.1f);
+            this.smallPtS = newlineS.smallPtS;
+            this.smallPtE = newlineS.smallPtE;
+
+            this.dda.Xst = newlineB.dda.Xst;
+            this.dda.Xend = newlineB.dda.Xend;
+            this.dda.Yst = newlineB.dda.Yst;
+            this.dda.Yend = newlineB.dda.Yend;
+            this.dda.calc();
+
+
+            Form1.lastPos.X = (int)this.bigPtE.X;
+            Form1.lastPos.Y = (int)this.bigPtE.Y;
+        }
     }
 
     public class Curve : Road
@@ -324,7 +382,7 @@ namespace Computer_Graphics_Project
             if (t <= 1.0)
             {
                 curvePoint = bigCurve.CalcCurvePointAtTime(t);
-                t += 0.01f;
+                t += 0.1f;
             }
             else
             {
@@ -446,6 +504,16 @@ namespace Computer_Graphics_Project
             bigCurve.ModifyCtrlPoint(1, bigCurve.GetPoint(1).X + x, bigCurve.GetPoint(1).Y);
             bigCurve.ModifyCtrlPoint(2, bigCurve.GetPoint(2).X + x, bigCurve.GetPoint(2).Y);
         }
+
+        public void rotateLeft()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void rotateRight()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public partial class Form1 : Form
@@ -518,27 +586,27 @@ namespace Computer_Graphics_Project
             //}
 
                 if (moveFlag == true && (road.Count > 0))
-            {
-                if (car.X > centerX)
                 {
-                    if (scroll < (1536 * 2) - 100)
+                    if (car.X > centerX)
                     {
-                        scroll += 25;
-
-                        for (int i = 0; i < road.Count; i++)
+                        if (scroll < (1536 * 2) - 100)
                         {
-                            road[i].shiftLeft(25);
-                        }
+                            scroll += 25;
 
-                        //oldLastPos = lastPos;
-                        //lastPos.X -= 50;
-                        //scrollct++;
-                        car.X -= 25;
+                            for (int i = 0; i < road.Count; i++)
+                            {
+                                road[i].shiftLeft(25);
+                            }
+
+                            //oldLastPos = lastPos;
+                            //lastPos.X -= 50;
+                            //scrollct++;
+                            car.X -= 25;
+                        }
                     }
+                    car = road[moveLock].CalcNextPoint();
+                    car.Y -= 50;
                 }
-                car = road[moveLock].CalcNextPoint();
-                car.Y -= 50;
-            }
 
             drawdubb(this.CreateGraphics());
         }
@@ -577,8 +645,38 @@ namespace Computer_Graphics_Project
                 start = true;
             }
 
+            if (e.KeyCode == Keys.P)
+            {
+                if(start == true)
+                {
+                    start = false;
+                    image = new Bitmap("pause.png");
+                }
+                else
+                {
+                    start = true;
+                    image = new Bitmap("wallpaper.png");
+                }
+            }
+
             if (start)
             {
+                if (e.KeyCode == Keys.Left)
+                {
+                    if (road.Count > 0)
+                    {
+                        road[selectLock].rotateLeft();
+
+                    }
+                }
+                if (e.KeyCode == Keys.Right)
+                {
+                    if (road.Count > 0)
+                    {
+                        road[selectLock].rotateRight();
+
+                    }
+                }
                 if (e.KeyCode == Keys.Enter)
                 {
                     selectLock = -1;
@@ -793,20 +891,23 @@ namespace Computer_Graphics_Project
             //g2.FillEllipse(Brushes.Red, centerX, centerY, 200, 200);
 
 
-            for (int i = 0; i < road.Count; i++)
+            if(start == true)
             {
-                road[i].Draw(g2);
-            }
+                for (int i = 0; i < road.Count; i++)
+                {
+                    road[i].Draw(g2);
+                }
 
-            if(selectLock >= 0)
-            {
-                g2.DrawRectangle(Pens.Red, road[selectLock].getBound());
-            }
+                if (selectLock >= 0)
+                {
+                    g2.DrawRectangle(Pens.Red, road[selectLock].getBound());
+                }
 
-            if (moveFlag == true)
-            {
-                //g2.FillEllipse(Brushes.Red, car.X - 20, car.Y - 20, 30, 30);
-                g2.DrawImage(new Bitmap(carImage, 80, 80), car);
+                if (moveFlag == true)
+                {
+                    //g2.FillEllipse(Brushes.Red, car.X - 20, car.Y - 20, 30, 30);
+                    g2.DrawImage(new Bitmap(carImage, 80, 80), car);
+                }
             }
 
 
